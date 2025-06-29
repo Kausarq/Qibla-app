@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotQibla - Направление на Каабу</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --apple-green: #30D158;
+            --apple-dark: #1C1C1E;
+            --apple-light: #F2F2F7;
+            --apple-gray: #8E8E93;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background-color: var(--apple-dark);
+            color: var(--apple-light);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--apple-gray);
+            margin-bottom: 2rem;
+        }
+        
+        .compass-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+        
+        .compass-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .compass-inner {
+            width: 90%;
+            height: 90%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .arrow-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .arrow {
+            width: 150px;
+            height: 150px;
+            background-color: var(--apple-green);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 0 0 10px rgba(48, 209, 88, 0.3),
+                        0 0 0 20px rgba(48, 209, 88, 0.2),
+                        0 0 0 30px rgba(48, 209, 88, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        .arrow-icon {
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 50px solid white;
+            position: absolute;
+            top: 20px;
+        }
+        
+        .distance {
+            position: absolute;
+            bottom: 30px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--apple-green);
+            text-align: center;
+            width: 100%;
+        }
+        
+        .location-info {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 0 2rem;
+        }
+        
+        .coordinates {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            color: var(--apple-gray);
+            font-size: 0.9rem;
+        }
+        
+        .find-btn {
+            background-color: var(--apple-green);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 2rem auto;
+            display: block;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .find-btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+        
+        .status {
+            text-align: center;
+            color: var(--apple-green);
+            font-weight: 500;
+            margin-top: 1rem;
+            min-height: 1.5rem;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(48, 209, 88, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .north {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--apple-gray);
+            font-weight: 500;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--apple-green);
+            animation: rotate 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-text {
+            color: white;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">Qibla Finder</h1>
+        <p class="subtitle">Направление на Священную Каабу</p>
+    </div>
+    
+    <div class="compass-container">
+        <div class="north">N</div>
+        <div class="compass-circle">
+            <div class="compass-inner"></div>
+        </div>
+        <div class="arrow-container">
+            <div class="arrow" id="arrow">
+                <div class="arrow-icon"></div>
+            </div>
+        </div>
+        <div class="distance" id="distance">-</div>
+    </div>
+    
+    <div class="location-info">
+        <div class="status" id="status">Нажмите "Найти Киблу" для начала</div>
+        <div class="coordinates">
+            <div id="latitude">Широта: -</div>
+            <div id="longitude">Долгота: -</div>
+        </div>
+    </div>
+    
+    <button class="find-btn" id="find-btn">Найти Киблу</button>
+    
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Определение местоположения...</div>
+    </div>
+
+    <script>
+        const findBtn = document.getElementById('find-btn');
+        const arrow = document.getElementById('arrow');
+        const distanceEl = document.getElementById('distance');
+        const statusEl = document.getElementById('status');
+        const latitudeEl = document.getElementById('latitude');
+        const longitudeEl = document.getElementById('longitude');
+        const loadingEl = document.getElementById('loading');
+        
+        // Координаты Каабы в Мекке
+        const kaabaCoords = {
+            latitude: 21.422487,
+            longitude: 39.826206
+        };
+        
+        findBtn.addEventListener('click', function() {
+            loadingEl.style.display = 'flex';
+            statusEl.textContent = 'Определение вашего местоположения...';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        loadingEl.style.display = 'none';
+                        const userCoords = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+                        
+                        updateUI(userCoords);
+                    },
+                    function(error) {
+                        loadingEl.style.display = 'none';
+                        statusEl.textContent = 'Ошибка: ' + getErrorText(error.code);
+                        console.error('Geolocation error:', error);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                loadingEl.style.display = 'none';
+                statusEl.textContent = 'Геолокация не поддерживается вашим браузером';
+            }
+        });
+        
+        function updateUI(userCoords) {
+            // Обновляем координаты
+            latitudeEl.textContent = `Широта: ${userCoords.latitude.toFixed(4)}°`;
+            longitudeEl.textContent = `Долгота: ${userCoords.longitude.toFixed(4)}°`;
+            
+            // Вычисляем расстояние до Каабы
+            const distance = calculateDistance(
+                userCoords.latitude,
+                userCoords.longitude,
+                kaabaCoords.latitude,
+                kaabaCoords.longitude
+            );
+            
+            distanceEl.textContent = `${Math.round(distance)} км до Каабы`;
+            
+            // Вычисляем направление на Каабу
+            const angle = calculateQiblaAngle(
+                userCoords.latitude,
+                userCoords.longitude
+            );
+            
+            // Поворачиваем стрелку
+            arrow.style.transform = `rotate(${angle}deg)`;
+            
+            statusEl.textContent = 'Направление на Каабу определено!';
+            statusEl.style.color = 'var(--apple-green)';
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            // Формула гаверсинусов для расчета расстояния
+            const R = 6371; // Радиус Земли в км
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function calculateQiblaAngle(lat, lng) {
+            // Преобразуем градусы в радианы
+            const phiK = kaabaCoords.latitude * Math.PI / 180;
+            const lambdaK = kaabaCoords.longitude * Math.PI / 180;
+            const phi = lat * Math.PI / 180;
+            const lambda = lng * Math.PI / 180;
+            
+            // Вычисляем угол Киблы
+            const psi = 180 / Math.PI * Math.atan2(
+                Math.sin(lambdaK - lambda),
+                Math.cos(phi) * Math.tan(phiK) - Math.sin(phi) * Math.cos(lambdaK - lambda)
+            );
+            
+            // Нормализуем угол (0-360)
+            return (psi + 360) % 360;
+        }
+        
+        function getErrorText(code) {
+            switch(code) {
+                case 1: return 'Доступ к геолокации запрещен';
+                case 2: return 'Не удалось определить местоположение';
+                case 3: return 'Время ожидания истекло';
+                default: return 'Неизвестная ошибка';
+            }
+        }
+    </script>
+</body>
+</html>
